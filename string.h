@@ -1,2 +1,2 @@
 int my_puts(const char *s);
-char *strchr(char *cs, char c);
+char *my_strchr(char *cs, char c);
