@@ -31,4 +31,4 @@ $(OBJDIR)/string.o : string.cpp string.h
 	$(CC) $(CFLAGS) -c string.cpp -o $(OBJDIR)/string.o
 
 clean :
-	rm test_strings $(OBJS)
+	rm test_strstr_hash $(OBJS)

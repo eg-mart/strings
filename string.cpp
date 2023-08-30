@@ -9,10 +9,7 @@ struct Hash {
 	unsigned long last_coeff;
 };
 
-const unsigned long q = 1000000007;
-
-struct Hash hash(const char *s, size_t n, unsigned long seed);
-unsigned long get_hash_seed();
+struct Hash hash(const char *s, size_t n);
 unsigned long my_pow(unsigned long x, unsigned long n);
 
 int my_puts(const char *s)
@@ -53,8 +50,9 @@ char *my_strcpy(char *dest, const char *src)
 	assert(src != NULL);
 
 	char *tmp = dest;
-	while ((*tmp++ = *src++) != '\0')
-		;
+	while ((*tmp++ = *src++) != '\0') {
+		putchar('\0');
+	}
 	return dest;
 }
 
@@ -191,14 +189,11 @@ unsigned long my_pow(unsigned long x, unsigned long n)
 	return tmp * tmp;
 }
 
-unsigned long get_hash_seed()
+struct Hash hash(const char *s, size_t n)
 {
-	return (unsigned long) rand() * (q - 1) / RAND_MAX;
-}
-
-struct Hash hash(const char *s, size_t n, unsigned long seed)
-{
-	unsigned long last_coeff = my_pow(32, n - 1);
+	unsigned long last_coeff = 1;
+	for (size_t i = 0; i < n - 1; i++)
+		last_coeff = last_coeff << 5;
 	unsigned long hash = 0;
 
 	while (n-- > 0) {
@@ -206,19 +201,28 @@ struct Hash hash(const char *s, size_t n, unsigned long seed)
 		hash = hash + (unsigned long) *s++;
 	}
 
-	return { hash, seed, last_coeff };
+	return { hash, 0, last_coeff };
 }
 
 char *my_strstr_hash(const char *str, const char *pattern)
 {
 	size_t p_len = my_strlen(pattern);
-	unsigned long seed = get_hash_seed();
-	struct Hash p_hash = hash(pattern, p_len, seed);
-	struct Hash str_hash = hash(str, p_len, seed);
+	struct Hash p_hash = hash(pattern, p_len);
+	struct Hash str_hash = hash(str, p_len);
 
 	for (size_t i = 0; str[i + p_len - 1] != '\0'; i++) {
-		if (str_hash.value == p_hash.value)
-			return (char*) str + i;
+		if (str_hash.value == p_hash.value) {
+			bool flag = true;
+			for (size_t j = 0; j < p_len; j++) {
+				if (str[i + j] != pattern[j]) {
+					flag = false;
+					break;
+				}
+			}
+
+			if (flag)
+				return (char*) str + i;
+		}
 		
 		str_hash.value = str_hash.value - (unsigned long) str[i] * str_hash.last_coeff;
 		str_hash.value = str_hash.value << 5;
